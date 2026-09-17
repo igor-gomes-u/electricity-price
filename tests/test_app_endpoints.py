@@ -136,3 +136,31 @@ def test_internal_server_error(client):
 
     assert status == 500
     assert "Internal server error" in response
+
+
+def test_calculate_rejects_oversized_request_before_upstream(client, monkeypatch, get_text):
+    def _unexpected_upstream_call(*_args, **_kwargs):
+        pytest.fail("The upstream service must not be called for an oversized request.")
+
+    monkeypatch.setattr(
+        "application.app.fetch_and_process_elpris_data",
+        _unexpected_upstream_call,
+    )
+
+    response = client.post(
+        "/calculate",
+        data={
+            "year": "2022",
+            "month": "11",
+            "day": "1",
+            "price_class": "SE3",
+            "padding": "x" * (16 * 1024),
+        },
+    )
+
+    assert response.status_code == 413
+
+    text = get_text(response)
+    assert "Request too large" in text
+    assert "The submitted request exceeds the allowed size." in text
+    assert "Traceback" not in text

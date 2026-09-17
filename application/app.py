@@ -14,6 +14,7 @@ from application.user_input import get_user_input
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
 HTTP_REQUESTS = Counter(
     "app_http_requests_total",
@@ -184,6 +185,20 @@ def handle_not_found_error(_error):
             back_url=url_for("index"),
         ),
         404,
+    )
+
+
+@app.errorhandler(413)
+def handle_request_entity_too_large(_error):
+    return (
+        render_template(
+            "message.html",
+            title="Request too large",
+            message="The submitted request exceeds the allowed size.",
+            severity="danger",
+            back_url=url_for("index"),
+        ),
+        413,
     )
 
 
