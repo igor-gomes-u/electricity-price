@@ -65,3 +65,17 @@ def test_create_chart():
     html = create_chart(current_prices, "2023-01-01", "SE3")
     assert isinstance(html, str)
     assert "<div" in html
+
+
+def test_create_pandas_table_escapes_html_content():
+    current_prices = pd.DataFrame(
+        {
+            "Time of day (hh:mm)": ["00:00"],
+            "Corresponding price (kr/kWh)": ["<script>alert(1)</script>"],
+        }
+    )
+
+    html = create_pandas_table(current_prices)
+
+    assert "<script>" not in html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html

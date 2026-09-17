@@ -21,7 +21,7 @@ def create_pandas_table(current_prices: pd.DataFrame) -> str:
         classes="table table-bordered table-striped",
         justify="left",
         index=False,
-        escape=False,
+        escape=True,
     )
 
 
