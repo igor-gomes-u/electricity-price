@@ -3,6 +3,8 @@ import socket
 import time
 
 from flask import Flask, Response, g, render_template, request, url_for
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from application.date_utils import get_default_form_field_values, get_min_max_allowed_dates, validate_date
@@ -15,6 +17,13 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
 
 HTTP_REQUESTS = Counter(
     "app_http_requests_total",
@@ -88,6 +97,7 @@ def index():
 
 
 @app.post("/calculate")
+@limiter.limit("10 per minute")
 def calculate_prices():
     try:
         year, month, day, price_class = get_user_input()
@@ -199,6 +209,20 @@ def handle_request_entity_too_large(_error):
             back_url=url_for("index"),
         ),
         413,
+    )
+
+
+@app.errorhandler(429)
+def handle_rate_limit_error(_error):
+    return (
+        render_template(
+            "message.html",
+            title="Too many requests",
+            message="Too many requests. Please wait a moment and try again.",
+            severity="warning",
+            back_url=url_for("index"),
+        ),
+        429,
     )
 
 
