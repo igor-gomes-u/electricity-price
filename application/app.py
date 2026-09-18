@@ -61,6 +61,14 @@ def _metrics_record(response):
     return response
 
 
+@app.after_request
+def _add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
+
 @app.get("/healthz")
 def healthz():
     return "ok", 200

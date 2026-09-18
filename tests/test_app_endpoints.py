@@ -173,3 +173,27 @@ def test_calculate_rejects_oversized_request_before_upstream(client, monkeypatch
     assert "Request too large" in text
     assert "The submitted request exceeds the allowed size." in text
     assert "Traceback" not in text
+
+
+@pytest.mark.parametrize(
+    ("header", "expected_value"),
+    [
+        ("X-Content-Type-Options", "nosniff"),
+        ("Referrer-Policy", "strict-origin-when-cross-origin"),
+        ("X-Frame-Options", "DENY"),
+    ],
+)
+def test_security_headers_are_present(client, header, expected_value):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.headers.get(header) == expected_value
+
+
+def test_security_headers_are_present_on_error_response(client):
+    response = client.get("/does-not-exist")
+
+    assert response.status_code == 404
+    assert response.headers.get("X-Content-Type-Options") == "nosniff"
+    assert response.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+    assert response.headers.get("X-Frame-Options") == "DENY"
