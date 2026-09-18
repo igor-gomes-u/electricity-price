@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from application.app import app, handle_internal_server_error
+from application.app import app, handle_internal_server_error, handle_rate_limit_error
 
 
 @pytest.fixture
@@ -136,6 +136,15 @@ def test_internal_server_error(client):
 
     assert status == 500
     assert "Internal server error" in response
+
+
+def test_rate_limit_handler_returns_message():
+    with app.test_request_context("/calculate"):
+        response, status = handle_rate_limit_error(None)
+
+    assert status == 429
+    assert "Too many requests" in response
+    assert "Please wait a moment and try again." in response
 
 
 def test_calculate_rejects_oversized_request_before_upstream(client, monkeypatch, get_text):
