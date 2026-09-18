@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from application.electricity_price_data import (
     extract_date_from_elpris_data,
@@ -6,9 +7,21 @@ from application.electricity_price_data import (
 )
 
 
-def test_extract_date_from_elpris_data():
-    data = [{"time_start": "2023-11-05T00:00:00Z"}]
-    assert extract_date_from_elpris_data(data) == "2023-11-05"
+@pytest.mark.parametrize(
+    "invalid_data",
+    [
+        [],
+        [{}],
+        [{"time_start": None}],
+        [{"time_start": 123}],
+        [{"time_start": ""}],
+        [{"time_start": "2023-11-05"}],
+        [{"time_start": "invalid timestamp"}],
+    ],
+)
+def test_extract_date_from_elpris_data_raises_on_invalid_data(invalid_data):
+    with pytest.raises(ValueError):
+        extract_date_from_elpris_data(invalid_data)
 
 
 def test_fetch_and_process_elpris_data_success(monkeypatch):

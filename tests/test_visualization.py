@@ -29,6 +29,73 @@ def test_create_pandas_dataframe_raises_on_incomplete_data():
         create_pandas_dataframe(sample_data)
 
 
+def test_create_pandas_dataframe_raises_when_data_is_not_a_list():
+    invalid_data = {"SEK_per_kWh": 40.0}
+
+    with pytest.raises(
+        ValueError,
+        match="Expected at least 24 hourly entries from the upstream API",
+    ):
+        create_pandas_dataframe(invalid_data)
+
+
+def test_create_pandas_dataframe_raises_when_entry_is_not_an_object():
+    sample_data = [
+        {
+            "time_start": f"2023-11-05T{hour:02d}:00:00Z",
+            "SEK_per_kWh": 40.0 + hour,
+        }
+        for hour in range(24)
+    ]
+    sample_data[5] = "invalid entry"
+
+    with pytest.raises(ValueError, match="Each hourly entry must be an object"):
+        create_pandas_dataframe(sample_data)
+
+
+def test_create_pandas_dataframe_raises_when_price_is_missing():
+    sample_data = [
+        {
+            "time_start": f"2023-11-05T{hour:02d}:00:00Z",
+            "SEK_per_kWh": 40.0 + hour,
+        }
+        for hour in range(24)
+    ]
+    sample_data[5].pop("SEK_per_kWh")
+
+    with pytest.raises(
+        ValueError,
+        match="Each hourly entry must contain SEK_per_kWh",
+    ):
+        create_pandas_dataframe(sample_data)
+
+
+@pytest.mark.parametrize(
+    "invalid_price",
+    [
+        None,
+        "40.0",
+        True,
+        False,
+        float("nan"),
+        float("inf"),
+        float("-inf"),
+    ],
+)
+def test_create_pandas_dataframe_raises_on_invalid_price(invalid_price):
+    sample_data = [
+        {
+            "time_start": f"2023-11-05T{hour:02d}:00:00Z",
+            "SEK_per_kWh": 40.0 + hour,
+        }
+        for hour in range(24)
+    ]
+    sample_data[5]["SEK_per_kWh"] = invalid_price
+
+    with pytest.raises(ValueError):
+        create_pandas_dataframe(sample_data)
+
+
 def test_create_pandas_table():
     current_prices = pd.DataFrame(
         {
