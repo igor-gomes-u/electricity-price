@@ -62,6 +62,48 @@ def test_metrics_latency_has_healthz_label(client, get_text):
     )
 
 
+def test_metrics_enabled_by_default_when_unset(client, get_text, monkeypatch):
+    monkeypatch.delenv("METRICS_ENABLED", raising=False)
+
+    r = client.get("/metrics")
+    assert r.status_code == 200
+    assert r.mimetype == "text/plain"
+
+
+def test_metrics_enabled_explicit_true(client, get_text, monkeypatch):
+    monkeypatch.setenv("METRICS_ENABLED", "true")
+
+    r = client.get("/metrics")
+    assert r.status_code == 200
+
+
+def test_metrics_disabled_returns_404(client, get_text, monkeypatch):
+    monkeypatch.setenv("METRICS_ENABLED", "false")
+
+    r = client.get("/metrics")
+    assert r.status_code == 404
+
+    text = get_text(r)
+    assert "Page not found" in text
+    assert "Traceback" not in text
+
+
+def test_metrics_disabled_is_case_insensitive(client, monkeypatch):
+    monkeypatch.setenv("METRICS_ENABLED", "FALSE")
+
+    r = client.get("/metrics")
+    assert r.status_code == 404
+
+
+def test_metrics_disabled_does_not_expose_prometheus_output(client, get_text, monkeypatch):
+    monkeypatch.setenv("METRICS_ENABLED", "false")
+
+    r = client.get("/metrics")
+    text = get_text(r)
+
+    assert "app_http_requests_total" not in text
+
+
 def test_metrics_exposes_upstream_requests_total(client, get_text, monkeypatch):
     def _fake_fetch_and_process_elpris_data(year, month, day, price_class):
         df = pd.DataFrame(
