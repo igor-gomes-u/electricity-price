@@ -54,6 +54,8 @@ Ett DevOps-fokuserat projekt som demonstrerar ett komplett leveransflöde, inklu
 > **Underhåll:** Dependabot används för schemalagda och kontrollerade uppdateringar av Python-beroenden, GitHub Actions och Docker base image.
 >
 > **Container build:** Imagen byggs via en multi-stage Dockerfile med en non-root runtime-image, låst digest för basimagen och health checks. Verktyg som endast används under byggprocessen ingår inte i den slutliga runtime-imagen, vilket minskar attackytan.
+>
+> **Runtime Protection:** Inkluderar inbyggda gränser för förfrågningsstorlek, rate limiting för beräkningar och globala säkra HTTP-headers för säker publik deployment.
 
 ## Projektöversikt
 
