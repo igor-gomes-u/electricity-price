@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from application.electricity_price_data import fetch_and_process_elpris_data
 
@@ -64,6 +65,64 @@ def test_fetch_and_process_elpris_data_incomplete_payload_returns_upstream_error
     )
 
     current_prices, date, err = fetch_and_process_elpris_data(2026, 1, 1, "SE3")
+
+    assert current_prices is None
+    assert date is None
+    assert err == "upstream_error"
+
+
+@pytest.mark.parametrize(
+    "invalid_entry",
+    [
+        {"time_start": "2026-01-01T00:00:00+01:00"},
+        {"SEK_per_kWh": 0.1},
+        {"time_start": None, "SEK_per_kWh": 0.1},
+        {"time_start": 123, "SEK_per_kWh": 0.1},
+        {"time_start": "", "SEK_per_kWh": 0.1},
+        {"time_start": "2026-01-01", "SEK_per_kWh": 0.1},
+        {"time_start": "invalid timestamp", "SEK_per_kWh": 0.1},
+        {
+            "time_start": "2026-01-01T00:00:00+01:00",
+            "SEK_per_kWh": "0.1",
+        },
+        {
+            "time_start": "2026-01-01T00:00:00+01:00",
+            "SEK_per_kWh": float("nan"),
+        },
+        {
+            "time_start": "2026-01-01T00:00:00+01:00",
+            "SEK_per_kWh": float("inf"),
+        },
+        {
+            "time_start": "2026-01-01T00:00:00+01:00",
+            "SEK_per_kWh": float("-inf"),
+        },
+    ],
+)
+def test_fetch_and_process_elpris_data_malformed_payload_returns_upstream_error(
+    monkeypatch,
+    invalid_entry,
+):
+    data = [
+        {
+            "time_start": f"2026-01-01T{hour:02d}:00:00+01:00",
+            "SEK_per_kWh": 0.1,
+        }
+        for hour in range(24)
+    ]
+    data[0] = invalid_entry
+
+    monkeypatch.setattr(
+        "application.electricity_price_data.get_elpris_data_from_api",
+        lambda _api_url: ("ok", data),
+    )
+
+    current_prices, date, err = fetch_and_process_elpris_data(
+        2026,
+        1,
+        1,
+        "SE3",
+    )
 
     assert current_prices is None
     assert date is None

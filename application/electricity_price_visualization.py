@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -6,7 +8,24 @@ def create_pandas_dataframe(elpris_data: list[dict]) -> pd.DataFrame:
     if not isinstance(elpris_data, list) or len(elpris_data) < 24:
         raise ValueError("Expected at least 24 hourly entries from the upstream API")
 
-    current_prices = [(hour, price["SEK_per_kWh"]) for hour, price in enumerate(elpris_data[:24])]
+    current_prices = []
+
+    for hour, entry in enumerate(elpris_data[:24]):
+        if not isinstance(entry, dict):
+            raise ValueError("Each hourly entry must be an object")
+
+        if "SEK_per_kWh" not in entry:
+            raise ValueError("Each hourly entry must contain SEK_per_kWh")
+
+        price = entry["SEK_per_kWh"]
+
+        if isinstance(price, bool) or not isinstance(price, (int, float)):
+            raise ValueError("SEK_per_kWh must be numeric")
+
+        if isinstance(price, float) and not math.isfinite(price):
+            raise ValueError("SEK_per_kWh must be finite")
+
+        current_prices.append((hour, price))
 
     return pd.DataFrame(
         {

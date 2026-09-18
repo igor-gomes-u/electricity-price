@@ -20,6 +20,24 @@ def test_get_elpris_data_from_api_success(monkeypatch):
     assert data == {"key": "value"}
 
 
+def test_get_elpris_data_from_api_invalid_json_returns_upstream_error(monkeypatch):
+    class _Response:
+        status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            raise ValueError("Invalid JSON")
+
+    monkeypatch.setattr(requests, "get", lambda _url, **_kwargs: _Response())
+
+    status, data = get_elpris_data_from_api("https://example.test/api/data")
+
+    assert status == "upstream_error"
+    assert data is None
+
+
 def test_get_elpris_data_from_api_404_returns_no_data_yet(monkeypatch):
     class _Response:
         status_code = 404

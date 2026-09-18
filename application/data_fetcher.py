@@ -9,7 +9,14 @@ def get_elpris_data_from_api(api_url, timeout=5):
     try:
         response = requests.get(api_url, timeout=timeout)
         response.raise_for_status()
-        return "ok", response.json()
+
+        try:
+            data = response.json()
+        except ValueError as exc:
+            logger.warning("Upstream returned invalid JSON: %s", exc)
+            return "upstream_error", None
+
+        return "ok", data
 
     except requests.exceptions.HTTPError as exc:
         status_code = getattr(exc.response, "status_code", None)
