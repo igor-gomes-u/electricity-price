@@ -1,8 +1,9 @@
 import logging
+import os
 import socket
 import time
 
-from flask import Flask, Response, g, render_template, request, url_for
+from flask import Flask, Response, abort, g, render_template, request, url_for
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
@@ -17,6 +18,11 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+
+
+def _metrics_enabled() -> bool:
+    return os.environ.get("METRICS_ENABLED", "true").strip().lower() != "false"
+
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -85,6 +91,8 @@ def readyz():
 
 @app.get("/metrics")
 def metrics():
+    if not _metrics_enabled():
+        abort(404)
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 
