@@ -57,7 +57,7 @@ COPY --from=builder /opt/venv /opt/venv
 COPY --chown=appuser:appuser application ./application
 
 # Gunicorn runtime settings for predictable performance
-ENV GUNICORN_CMD_ARGS="--workers=2 --threads=2 --timeout=60 --graceful-timeout=30"
+ENV GUNICORN_CMD_ARGS="--workers=2 --threads=2 --timeout=60 --graceful-timeout=30 --access-logfile - --error-logfile -"
 
 EXPOSE 8000
 
