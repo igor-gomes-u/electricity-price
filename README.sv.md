@@ -55,7 +55,7 @@ Ett DevOps-fokuserat projekt som demonstrerar ett komplett leveransflöde, inklu
 >
 > **Container build:** Imagen byggs via en multi-stage Dockerfile med en non-root runtime-image, låst digest för basimagen och health checks. Verktyg som endast används under byggprocessen ingår inte i den slutliga runtime-imagen, vilket minskar attackytan.
 >
-> **Runtime Protection:** Inkluderar inbyggda gränser för förfrågningsstorlek, rate limiting för beräkningar och globala säkra HTTP-headers för säker publik deployment.
+> **Runtime Protection:** Inkluderar inbyggd begränsning av förfrågningsstorlek, rate limiting för beräkningar och globala HTTP security headers för säker publik deployment.
 
 ## Projektöversikt
 
@@ -178,6 +178,8 @@ docker compose up -d
 | `/metrics`   | Prometheus-metrik                    |
 
 > **Obs:** Endpointen `/calculate` används via formuläret i webbgränssnittet och är inte avsedd att anropas direkt i webbläsaren (HTTP POST).
+>
+> **Prometheus-metrik:** `/metrics` är aktiverad som standard. Sätt `METRICS_ENABLED=false` för att inaktivera publik åtkomst och returnera HTTP 404.
 
 ## CI/CD-pipelines (Build → PR till GitOps → Deployment)
 
