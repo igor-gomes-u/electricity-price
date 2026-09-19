@@ -55,7 +55,7 @@ A DevOps-focused project demonstrating a complete delivery workflow, including C
 >
 > **Container build:** The image is built via a multi-stage Dockerfile using a non-root runtime image, pinned base image digest and health checks. Build-time tooling is excluded from the final runtime image to reduce the attack surface.
 >
-> **Runtime Protection:** Includes built-in request size limits, calculation rate-limiting, and global secure HTTP headers for safe public deployment.
+> **Runtime Protection:** Includes built-in request size limits, calculation rate limiting, and global secure HTTP headers for safe public deployment.
 
 ## Project Overview
 
@@ -177,6 +177,8 @@ docker compose up -d
 | `/metrics`   | Prometheus metrics                    |
 
 > **Note:** The `/calculate` endpoint is used via the web interface form and is not intended to be accessed directly in the browser (HTTP POST).
+>
+> **Prometheus metrics:** `/metrics` is enabled by default. Set `METRICS_ENABLED=false` to disable public access and return HTTP 404.
 
 ## CI/CD Pipelines (Build → PR to GitOps → Deployment)
 
