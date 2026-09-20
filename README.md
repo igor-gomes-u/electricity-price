@@ -19,6 +19,12 @@
 
 A DevOps-focused project demonstrating a complete delivery workflow, including CI/CD, GitOps, integrated security practices, observability, policy enforcement and controlled environment promotion, built around a self-developed application.
 
+## Live Demo
+
+[Open the live application](https://electricity.igorgomes.dev)
+
+> This public instance is provided for demonstration purposes. The demo environment may enter standby after 15 minutes without incoming requests. The first request after standby may take approximately 30–60 seconds while the service starts.
+
 ## Overview
 
 ### This repository is responsible for

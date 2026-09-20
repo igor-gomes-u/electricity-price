@@ -19,6 +19,12 @@
 
 Ett DevOps-fokuserat projekt som demonstrerar ett komplett leveransflöde, inklusive CI/CD, GitOps, kontinuerliga säkerhetskontroller, observability, policy enforcement och kontrollerad miljö-promotion, baserat på en egenutvecklad applikation.
 
+## Live-demo
+
+[Öppna live-applikationen](https://electricity.igorgomes.dev)
+
+> Den här publika instansen tillhandahålls i demonstrationssyfte. Demomiljön kan gå in i viloläge efter 15 minuter utan inkommande förfrågningar. Den första förfrågan därefter kan ta cirka 30–60 sekunder medan tjänsten startar.
+
 ## Översikt
 
 ### Det här repositoryt ansvarar för
